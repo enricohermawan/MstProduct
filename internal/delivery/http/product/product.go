@@ -8,30 +8,32 @@ import (
 	"strings"
 
 	"product/pkg/response"
+
+	pEntity "product/internal/entity/product"
 )
 
-// ISkeletonSvc is an interface to Skeleton Service
+// IProductSvc is an interface to Skeleton Service
 // Masukkan function dari service ke dalam interface ini
-type ISkeletonSvc interface {
-	GetItemPromo(ctx context.Context) ([]itemPromoEntity.ItemPromo, error)
+type IProductSvc interface {
+	TampilDetailMP(ctx context.Context, kode string) ([]pEntity.MstProduct, error)
 }
 
 type (
 	// Handler ...
 	Handler struct {
-		skeletonSvc ISkeletonSvc
+		ProductSvc IProductSvc
 	}
 )
 
 // New for bridging product handler initialization
-func New(is ISkeletonSvc) *Handler {
+func New(is IProductSvc) *Handler {
 	return &Handler{
-		skeletonSvc: is,
+		ProductSvc: is,
 	}
 }
 
-// SkeletonHandler will receive request and return response
-func (h *Handler) SkeletonHandler(w http.ResponseWriter, r *http.Request) {
+// ProductHandler will receive request and return response
+func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 	var (
 		resp     *response.Response
 		result   interface{}
@@ -45,7 +47,21 @@ func (h *Handler) SkeletonHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	// Check if request method is GET
 	case http.MethodGet:
-		result, err = h.skeletonSvc.GetItemPromo(context.Background())
+		paramMap := r.URL.Query()
+		len := len(paramMap)
+		switch len {
+		case 2:
+			_, getKodeOK := paramMap["kode"]
+			if getKodeOK {
+				var (
+					kode string
+				)
+
+				kode = r.FormValue("kode")
+
+				result, err = h.ProductSvc.TampilDetailMP(context.Background(), kode)
+			}
+		}
 
 	// Check if request method is POST
 	case http.MethodPost:

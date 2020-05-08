@@ -3,6 +3,7 @@ package retur
 import (
 	"context"
 
+	pEntity "product/internal/entity/product"
 	"product/pkg/errors"
 )
 
@@ -11,56 +12,40 @@ import (
 type Data interface {
 }
 
-type doData interface {
-	GetAllJSONDO(ctx context.Context, noTransf string) (reEntity.JSONDO, error)
+type mpData interface {
+	GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
 }
 
 // Service ...
 // Tambahkan variable sesuai banyak data layer yang dibutuhkan
 type Service struct {
-	returData Data
-	doData    doData
+	productData Data
+	mpData      mpData
 }
 
 // New ...
 // Tambahkan parameter sesuai banyak data layer yang dibutuhkan
-func New(returData Data, doData doData) Service {
+func New(productData Data, mpData mpData) Service {
 	// Assign variable dari parameter ke object
 	return Service{
-		returData: returData,
-		doData:    doData,
+		productData: productData,
+		mpData:      mpData,
 	}
 }
 
-// TampilHeaderDO ...
-func (s Service) TampilHeaderDO(ctx context.Context, noTransf string) (reEntity.TransFH, error) {
+// TampilDetailMP ...
+func (s Service) TampilDetailMP(ctx context.Context, kode string) (pEntity.MstProduct, error) {
+
 	var (
-		tempResult reEntity.JSONDO
-		err        error
+		product pEntity.MstProduct
+		err     error
 	)
 
-	tempResult, err = s.doData.GetAllJSONDO(ctx, noTransf)
-	header := tempResult.TransFH
+	product, err = s.mpData.GetAllJSONMP(ctx, kode)
+	// Error handling
 	if err != nil {
-		return header, errors.Wrap(err, "[SERVICE][TampilHeaderDO]")
+		return product, errors.Wrap(err, "[SERVICE][TampilDetailMP]")
 	}
-
-	return header, err
-}
-
-// TampilDetailDO ...
-func (s Service) TampilDetailDO(ctx context.Context, noTransf string) ([]reEntity.TransFD, error) {
-	var (
-		tempResult reEntity.JSONDO
-		err        error
-	)
-
-	tempResult, err = s.doData.GetAllJSONDO(ctx, noTransf)
-	details := tempResult.TransFD
-
-	if err != nil {
-		return details, errors.Wrap(err, "[SERVICE][TampilDetailDO]")
-	}
-
-	return details, err
+	// Return users array
+	return product, err
 }

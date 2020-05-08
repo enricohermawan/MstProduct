@@ -26,9 +26,9 @@ func New(client *httpclient.Client, baseURL string) Data {
 }
 
 // GetAllJSONMP ...
-func (d Data) GetAllJSONMP(ctx context.Context, procod string) pEntity.Ms {
-	var json productEntity.product
-	var endpoint = d.baseURL + "/Product/" + procod
+func (d Data) GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct, error) {
+	var json pEntity.MstProduct
+	var endpoint = d.baseURL + "/Product/" + kode
 	_, err := d.client.GetJSON(ctx, endpoint, nil, &json)
 	if err != nil {
 		return json, errors.Wrap(err, "[DATA][GetJsonMPByProcod]")
