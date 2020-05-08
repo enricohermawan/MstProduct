@@ -51,14 +51,14 @@ func WithConfigFile(file string) Option {
 
 func getDefaultConfigFile() string {
 	var (
-		repoPath   = filepath.Join(os.Getenv("GOPATH"), "src/go-itempromo")
-		configPath = filepath.Join(repoPath, "files/etc/itemPromo/itemPromo.development.yaml")
+		repoPath   = filepath.Join(os.Getenv("GOPATH"), "src/product")
+		configPath = filepath.Join(repoPath, "files/etc/Product/product.development.yaml")
 		env        = os.Getenv("ENV")
 	)
 
 	if env != "" {
 		if env == envStaging {
-			configPath = "./skeleton.staging.yaml"
+			configPath = "./product.staging.yaml"
 		}
 	}
 	return configPath

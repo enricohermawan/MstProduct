@@ -20,5 +20,6 @@ type (
 
 	// APIConfig ...
 	APIConfig struct {
+		MP string `yaml:"mp"`
 	}
 )

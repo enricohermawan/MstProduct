@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"go-itempromo/internal/boot"
+	"product/internal/boot"
 
 	_ "github.com/go-sql-driver/mysql"
 )

@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"go-itempromo/pkg/grace"
+	"product/pkg/grace"
 )
 
 // SkeletonHandler ...

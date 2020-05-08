@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"go-itempromo/pkg/response"
+	"product/pkg/response"
 
 	"github.com/gorilla/mux"
 )

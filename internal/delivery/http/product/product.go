@@ -1,14 +1,13 @@
-package itemPromo
+package product
 
 import (
 	"context"
 	"errors"
-	itemPromoEntity "go-itempromo/internal/entity/itemPromo"
 	"log"
 	"net/http"
 	"strings"
 
-	"go-itempromo/pkg/response"
+	"product/pkg/response"
 )
 
 // ISkeletonSvc is an interface to Skeleton Service

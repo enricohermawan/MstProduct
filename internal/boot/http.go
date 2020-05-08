@@ -4,24 +4,27 @@ import (
 	"log"
 	"net/http"
 
-	"go-itempromo/internal/config"
+	"product/internal/config"
+	"product/pkg/httpclient"
 
 	"github.com/jmoiron/sqlx"
 
-	skeletonData "go-itempromo/internal/data/itemPromo"
-	skeletonServer "go-itempromo/internal/delivery/http"
-	skeletonHandler "go-itempromo/internal/delivery/http/itemPromo"
-	skeletonService "go-itempromo/internal/service/itemPromo"
+	mpData "product/internal/data/mp"
+	productData "product/internal/data/product"
+	productServer "product/internal/delivery/http"
+	productHandler "product/internal/delivery/http/product"
+	productService "product/internal/service/product"
 )
 
 // HTTP will load configuration, do dependency injection and then start the HTTP server
 func HTTP() error {
 	var (
-		s   skeletonServer.Server    // HTTP Server Object
-		sd  skeletonData.Data        // Domain data layer
-		ss  skeletonService.Service  // Domain service layer
-		sh  *skeletonHandler.Handler // Domain handler
-		cfg *config.Config           // Configuration object
+		srv      productServer.Server // HTTP Server Object
+		mpD      mpData.Data
+		productD productData.Data        // Domain data layer
+		productS productService.Service  // Domain service layer
+		productH *productHandler.Handler // Domain handler
+		cfg      *config.Config          // Configuration object
 	)
 
 	err := config.Init()
@@ -29,6 +32,10 @@ func HTTP() error {
 		log.Fatalf("[CONFIG] Failed to initialize config: %v", err)
 	}
 	cfg = config.Get()
+	// HTTP Client
+	httpc := httpclient.NewClient()
+
+	mpD = mpData.New(httpc, cfg.API.MP)
 	// Open MySQL DB Connection
 	db, err := sqlx.Open("mysql", cfg.Database.Master)
 	if err != nil {
@@ -36,15 +43,15 @@ func HTTP() error {
 	}
 
 	// Diganti dengan domain yang anda buat
-	sd = skeletonData.New(db)
-	ss = skeletonService.New(sd)
-	sh = skeletonHandler.New(ss)
+	productD = productData.New(db)
+	productS = productService.New(productD, mpD)
+	productH = productHandler.New(productS)
 
-	s = skeletonServer.Server{
-		Skeleton: sh,
+	srv = productServer.Server{
+		Product: productH,
 	}
 
-	if err := s.Serve(cfg.Server.Port); err != http.ErrServerClosed {
+	if err := srv.Serve(cfg.Server.Port); err != http.ErrServerClosed {
 		return err
 	}
 

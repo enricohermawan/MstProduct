@@ -3,4 +3,4 @@ server:
 database:
     master: "spetnaz:sp3tn4z2019@tcp(34.87.44.167)/upload-download-vb?parseTime=true"
 api:
-    
+    mp: "http://34.107.201.130/CHCMasterProduk"
