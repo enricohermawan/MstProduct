@@ -6,16 +6,16 @@ import (
 	"product/pkg/grace"
 )
 
-// SkeletonHandler ...
-type SkeletonHandler interface {
+// ProductHandler ...
+type ProductHandler interface {
 	// Masukkan fungsi handler di sini
-	SkeletonHandler(w http.ResponseWriter, r *http.Request)
+	ProductHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // Server ...
 type Server struct {
-	server   *http.Server
-	Skeleton SkeletonHandler
+	server  *http.Server
+	Product ProductHandler
 }
 
 // Serve is serving HTTP gracefully on port x ...

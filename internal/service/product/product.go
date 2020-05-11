@@ -1,8 +1,8 @@
-package retur
+package product
 
 import (
 	"context"
-
+	"fmt"
 	pEntity "product/internal/entity/product"
 	"product/pkg/errors"
 )
@@ -42,6 +42,9 @@ func (s Service) TampilDetailMP(ctx context.Context, kode string) (pEntity.MstPr
 	)
 
 	product, err = s.mpData.GetAllJSONMP(ctx, kode)
+
+	fmt.Println("test")
+
 	// Error handling
 	if err != nil {
 		return product, errors.Wrap(err, "[SERVICE][TampilDetailMP]")

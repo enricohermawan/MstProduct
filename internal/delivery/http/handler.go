@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
-
+	"os"
 	"product/pkg/response"
 
 	"github.com/gorilla/mux"
@@ -13,13 +13,18 @@ import (
 // Handler will initialize mux router and register handler
 func (s *Server) Handler() *mux.Router {
 	r := mux.NewRouter()
-	// Jika tidak ditemukan, jangan diubah.
 	r.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 	// Tambahan Prefix di depan API endpoint
-	router := r.PathPrefix("").Subrouter()
-	router.HandleFunc("/GetItemPromo", s.Skeleton.SkeletonHandler).Methods("GET")
-
+	sub := r.PathPrefix("").Subrouter()
+	// Health Check
+	sub.HandleFunc("/", defaultHandler).Methods("GET")
+	sub.HandleFunc("/", defaultHandler).Methods("GET")
+	sub.HandleFunc("/Product", s.Product.ProductHandler).Methods("GET")
 	return r
+}
+
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("API Auto Assigner WFH" + os.Getenv("VERSION")))
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {

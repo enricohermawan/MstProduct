@@ -15,7 +15,7 @@ import (
 // IProductSvc is an interface to Skeleton Service
 // Masukkan function dari service ke dalam interface ini
 type IProductSvc interface {
-	TampilDetailMP(ctx context.Context, kode string) ([]pEntity.MstProduct, error)
+	TampilDetailMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
 }
 
 type (
@@ -47,6 +47,7 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	// Check if request method is GET
 	case http.MethodGet:
+
 		paramMap := r.URL.Query()
 		len := len(paramMap)
 		switch len {
