@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -51,7 +52,7 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 		paramMap := r.URL.Query()
 		len := len(paramMap)
 		switch len {
-		case 2:
+		case 1:
 			_, getKodeOK := paramMap["kode"]
 			if getKodeOK {
 				var (
@@ -59,7 +60,7 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 				)
 
 				kode = r.FormValue("kode")
-
+				fmt.Println("Masuk ke Handler")
 				result, err = h.ProductSvc.TampilDetailMP(context.Background(), kode)
 			}
 		}
