@@ -28,7 +28,7 @@ func New(client *httpclient.Client, baseURL string) Data {
 
 // GetAllJSONMP ...
 func (d Data) GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct, error) {
-	var json pEntity.MstProduct
+	var json pEntity.JSONTerima
 	var endpoint = d.baseURL + "/Product?kode=" + kode
 
 	_, err := d.client.GetJSON(ctx, endpoint, nil, &json)
@@ -36,8 +36,8 @@ func (d Data) GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct
 	fmt.Println("Link", endpoint)
 	fmt.Println("Data Json", json)
 	if err != nil {
-		return json, errors.Wrap(err, "[DATA][GetJsonMPByProcod]")
+		return json.Data, errors.Wrap(err, "[DATA][GetJsonMPByProcod]")
 	}
 
-	return json, err
+	return json.Data, err
 }

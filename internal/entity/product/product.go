@@ -96,3 +96,8 @@ type MstProduct struct {
 	ProHalalDate       zero.String `db:"Pro_HalalDate" json:"pro_halaldate"`
 	ProHalal           zero.String `db:"Pro_Halal" json:"pro_halal"`
 }
+
+// JSONTerima ...
+type JSONTerima struct {
+	Data MstProduct `json:"data"`
+}
