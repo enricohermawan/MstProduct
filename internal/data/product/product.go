@@ -3,6 +3,8 @@ package product
 import (
 	"context"
 	"log"
+	pEntity "product/internal/entity/product"
+	"product/pkg/errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -21,17 +23,15 @@ type (
 	}
 )
 
-// Tambahkan query di dalam const
-// getAllUser = "GetAllUser"
-// qGetAllUser = "SELECT * FROM users"
-const ()
+const (
+	tampilDetailDataByNoReceive  = "TampilDetailDataByNoReceive"
+	qtampilDetailDataByNoReceive = "SELECT * FROM MH_Product_Alvin JOIN TranRCD ON MH_Product_Alvin.Pro_Code = TranRCD.TranrcD_ProCod WHERE TranRCD.TranrcD_NoTranrc = ?"
+)
 
-// Tambahkan query ke dalam key value order agar menjadi prepared statements
-// readStmt = []statement{
-// 	{getAllUser, qGetAllUser},
-// }
 var (
-	readStmt = []statement{}
+	readStmt = []statement{
+		{tampilDetailDataByNoReceive, qtampilDetailDataByNoReceive},
+	}
 )
 
 // New ...
@@ -58,4 +58,21 @@ func (d *Data) initStmt() {
 	}
 
 	d.stmt = stmts
+}
+
+// TampilDetailReceiveByNoReceive ..
+func (d Data) TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error) {
+	var (
+		product pEntity.Gabung
+		err     error
+	)
+
+	// Query ke database
+	err = d.stmt[tampilDetailDataByNoReceive].QueryRowxContext(ctx, NoTranrc).StructScan(&product)
+
+	if err != nil {
+		return product.MstProduct, errors.Wrap(err, "[DATA][TampilDetailReceiveByNoReceive]")
+	}
+
+	return product.MstProduct, err
 }

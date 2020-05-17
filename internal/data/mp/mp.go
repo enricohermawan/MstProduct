@@ -2,7 +2,6 @@ package do
 
 import (
 	"context"
-	"fmt"
 
 	pEntity "product/internal/entity/product"
 	"product/pkg/httpclient"
@@ -32,9 +31,7 @@ func (d Data) GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct
 	var endpoint = d.baseURL + "/Product?kode=" + kode
 
 	_, err := d.client.GetJSON(ctx, endpoint, nil, &json)
-	fmt.Println("Kode", kode)
-	fmt.Println("Link", endpoint)
-	fmt.Println("Data Json", json)
+
 	if err != nil {
 		return json.Data, errors.Wrap(err, "[DATA][GetJsonMPByProcod]")
 	}

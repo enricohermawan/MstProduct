@@ -1,6 +1,6 @@
 server:
     port: ":8888"
 database:
-    master: "spetnaz:sp3tn4z2019@tcp(34.87.44.167)/upload-download-vb?parseTime=true"
+    master: "spetnaz:sp3tn4z2019@tcp(34.87.44.167:3306)/TN-In"
 api:
     mp: "https://api.docnet.id/CHCMasterProduk"

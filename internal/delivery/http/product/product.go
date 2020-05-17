@@ -3,7 +3,6 @@ package product
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -17,6 +16,7 @@ import (
 // Masukkan function dari service ke dalam interface ini
 type IProductSvc interface {
 	TampilDetailMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
+	TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error)
 }
 
 type (
@@ -54,14 +54,20 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 		switch len {
 		case 1:
 			_, getKodeOK := paramMap["kode"]
+			_, NoTranrcOK := paramMap["NoTranrc"]
 			if getKodeOK {
 				var (
 					kode string
 				)
 
 				kode = r.FormValue("kode")
-				fmt.Println("Masuk ke Handler")
 				result, err = h.ProductSvc.TampilDetailMP(context.Background(), kode)
+			} else if NoTranrcOK {
+				var (
+					NoTranrc string
+				)
+				NoTranrc = r.FormValue("NoTranrc")
+				result, err = h.ProductSvc.TampilDetailReceiveByNoReceive(context.Background(), NoTranrc)
 			}
 		}
 

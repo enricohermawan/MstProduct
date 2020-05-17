@@ -1,6 +1,8 @@
 package product
 
 import (
+	"time"
+
 	"gopkg.in/guregu/null.v3/zero"
 )
 
@@ -77,7 +79,7 @@ type MstProduct struct {
 	ProBufferYN        zero.String `db:"Pro_BufferYN" json:"pro_bufferyn"`
 	ProStorageTemp     zero.Int    `db:"Pro_StorageTemp" json:"pro_storagetemp"`
 	ProClsProduct      zero.String `db:"Pro_ClsProduct" json:"pro_clsproduct"`
-	ProClsMargin       zero.String `db:"Pro_ClsNMargin" json:"pro_clsmargin"`
+	ProClsMargin       zero.String `db:"Pro_ClsMargin" json:"pro_clsmargin"`
 	ProInHealth        zero.String `db:"Pro_InHealth" json:"pro_inhealth"`
 	ProCodeSup         zero.String `db:"Pro_CodeSup" json:"pro_codesup"`
 	ProPointMedPack    zero.Float  `db:"Pro_PointMedPack" json:"pro_pointmedpack"`
@@ -100,4 +102,128 @@ type MstProduct struct {
 // JSONTerima ...
 type JSONTerima struct {
 	Data MstProduct `json:"data"`
+}
+
+// TransFD ...
+type TransFD struct {
+	TransfDRunningID       int    `db:"TransfD_RunningID" json:"TransfD_RunningID,omitempty"`
+	TransfDOutCodeTransf   string `db:"TransfD_OutCodeTransf" json:"TransfD_OutCodeTransf,omitempty"`
+	TransfDNoTransf        string `db:"TransfD_NoTransf" json:"TransfD_NoTransf,omitempty"`
+	TransfDGroup           string `db:"TransfD_Group" json:"TransfD_Group,omitempty"`
+	TransfDOutCodeSP       string `db:"TransfD_OutCodeSP" json:"TransfD_OutCodeSP,omitempty"`
+	TransfDNoSP            string `db:"TransfD_NoSP" json:"TransfD_NoSP,omitempty"`
+	TransfDProCod          string `db:"TransfD_ProCod" json:"TransfD_ProCod,omitempty"`
+	TransfDBatchNumber     string `db:"TransfD_BatchNumber" json:"TransfD_BatchNumber,omitempty"`
+	TransfDED              string `db:"TransfD_ED" json:"TransfD_ED,omitempty"`
+	TransfDQty             int    `db:"TransfD_Qty" json:"TransfD_Qty,omitempty"`
+	TransfDQtyScan         int    `db:"TransfD_Qty_Scan" json:"TransfD_Qty_Scan,omitempty"`
+	TransfDQtyStk          int    `db:"TransfD_QtyStk" json:"TransfD_QtyStk,omitempty"`
+	TransfDOutCodeOrder    string `db:"TransfD_OutCodeOrder" json:"TransfD_OutCodeOrder,omitempty"`
+	TransfDNoOrder         string `db:"TransfD_NoOrder" json:"TransfD_NoOrder,omitempty"`
+	TransFDCategoryProduct int    `db:"TransFD_CategoryProduct" json:"TransFD_CategoryProduct,omitempty"`
+	TransFDEditYN          string `db:"TransFD_EditYN" json:"TransFD_EditYN,omitempty"`
+	TransfDActiveYN        string `db:"TransfD_ActiveYN" json:"TransfD_ActiveYN,omitempty"`
+	TransfDUserID          string `db:"TransfD_UserID" json:"TransfD_UserID,omitempty"`
+	TransfDLastUpdate      string `db:"TransfD_LastUpdate" json:"TransfD_LastUpdate,omitempty"`
+	TransfDDataAktifYN     string `db:"TransfD_DataAktifYN" json:"TransfD_DataAktifYN,omitempty"`
+	TransfDSPID            string `db:"TransfD_SPID" json:"TransfD_SPID,omitempty"`
+	TransfDSalePrice       string `db:"TransfD_SalePrice" json:"TransfD_SalePrice,omitempty"`
+	TransfDDiscount        string `db:"TransfD_Discount" json:"TransfD_Discount,omitempty"`
+}
+
+// TransFH ...
+type TransFH struct {
+	TransfHNoSP          zero.String `db:"" json:"transfH_NoSP"`
+	TransfHRunningID     zero.Int    `db:"" json:"transfH_RunningID"`
+	TransfHLastUpdate    time.Time   `db:"" json:"transfH_LastUpdate"`
+	TransfHUpload        zero.String `db:"" json:"transfH_Upload"`
+	TransfHGroup         zero.Int    `db:"" json:"transfH_Group"`
+	TransfHFlag          zero.String `db:"" json:"transfH_Flag"`
+	TransfHDataAktifYN   zero.String `db:"" json:"transfH_DataAktifYN"`
+	TransfHNoTransf      zero.String `db:"" json:"transfH_NoTransf"`
+	TransfHTglTransf     time.Time   `db:"" json:"transfH_TglTransf"`
+	TransfHOutCodeSP     zero.Int    `db:"" json:"transfH_OutCodeSP"`
+	TransfHOutCodeDest   zero.Int    `db:"" json:"transfH_OutCodeDest"`
+	TransfHOutCodeTransf zero.Int    `db:"" json:"transfH_OutCodeTransf"`
+	TransfHFlagSttk      zero.String `db:"" json:"transfH_FlagSttk"`
+	TransfHTransfer      zero.String `db:"" json:"transfH_Transfer"`
+	TransfHActiveYN      zero.String `db:"" json:"transfH_ActiveYN"`
+	TransfHTglDwld       time.Time   `db:"" json:"transfH_TglDwld"`
+	TransfHUserID        zero.String `db:"" json:"transfH_UserID"`
+	TransfHFlagTrf       zero.String `db:"" json:"transfH_FlagTrf"`
+	TransfHTranno        zero.Int    `db:"" json:"transfH_Tranno"`
+}
+
+// TranRCD ...
+type TranRCD struct {
+	TranrcDRunningID     string `db:"TranrcD_RunningID" json:"TranrcD_RunningID"`
+	TranrcDOutCodeTransf string `db:"TranrcD_OutCodeTransf" json:"TranrcD_OutCodeTransf"`
+	TranrcDNoTransf      string `db:"TranrcD_NoTransf" json:"TranrcD_NoTransf"`
+	TranrcDOutCodeTranrc string `db:"TranrcD_OutCodeTranrc" json:"TranrcD_OutCodeTranrc"`
+	TranrcDNoTranrc      string `db:"TranrcD_NoTranrc" json:"TranrcD_NoTranrc"`
+	TranrcDProcod        string `db:"TranrcD_Procod" json:"TranrcD_Procod"`
+	TranrcDBBatchNumber  string `db:"TranrcDB_BatchNumber" json:"TranrcDB_BatchNumber"`
+	TranrcDBKonsentrasi  string `db:"TranrcDB_Konsentrasi" json:"TranrcDB_Konsentrasi"`
+	TranrcDQuantityRecv  string `db:"TranrcD_QuantityRecv" json:"TranrcD_QuantityRecv"`
+	TranrcDQuantityScan  string `db:"TranrcD_QuantityScan" json:"TranrcD_QuantityScan"`
+	TranrcDQuantityStk   string `db:"TranrcD_QuantityStk" json:"TranrcD_QuantityStk"`
+	TranrcDOutCodeOR     string `db:"TranrcD_OutCodeOR" json:"TranrcD_OutCodeOR"`
+	TranrcDNoOR          string `db:"TranrcD_NoOR" json:"TranrcD_NoOR"`
+	TranrcDQuantityOR    string `db:"TranrcD_QuantityOR" json:"TranrcD_QuantityOR"`
+	TranrcDActiveYN      string `db:"TranrcD_ActiveYN" json:"TranrcD_ActiveYN"`
+	TranrcDUserID        string `db:"TranrcD_UserId" json:"TranrcD_UserId"`
+	TranrcDlastUpdate    string `db:"TranrcD_lastUpdate" json:"TranrcD_lastUpdate"`
+	TranrcDDataAktifYN   string `db:"TranrcD_DataAktifYN" json:"TranrcD_DataAktifYN"`
+}
+
+// TranRCH ...
+type TranRCH struct {
+	TranrcHRunningID     string `db:"TranrcH_RunningID" json:"TranrcH_RunningID"`
+	TranrcHOutCodeTransf string `db:"TranrcH_OutCodeTransf" json:"TranrcH_OutCodeTransf"`
+	TranrcHNoTransf      string `db:"TranrcH_NoTransf" json:"TranrcH_NoTransf"`
+	TranrcHOutCodeTranrc string `db:"TranrcH_OutCodeTranrc" json:"TranrcH_OutCodeTranrc"`
+	TranrcHNoTranrc      string `db:"TranrcH_NoTranrc" json:"TranrcH_NoTranrc"`
+	TranrcHTglTranrc     string `db:"TranrcH_TglTranrc" json:"TranrcH_TglTranrc"`
+	TranrcHFlag          string `db:"TranrcH_Flag" json:"TranrcH_Flag"`
+	TranrcHFlagTrf       string `db:"TranrcH_FlagTrf" json:"TranrcH_FlagTrf"`
+	TranrcHTglDwld       string `db:"TranrcH_TglDwld" json:"TranrcH_TglDwld"`
+	TranrcHNip           string `db:"TranrcH_Nip" json:"TranrcH_Nip"`
+	TranrcHActiveYN      string `db:"TranrcH_ActiveYN" json:"TranrcH_ActiveYN"`
+	TranrcHUserID        string `db:"TranrcH_UserId" json:"TranrcH_UserId"`
+	TranrcHlastUpdate    string `db:"TranrcH_lastUpdate" json:"TranrcH_lastUpdate"`
+	TranrcHDataAktifYN   string `db:"TranrcH_DataAktifYN" json:"TranrcH_DataAktifYN"`
+}
+
+// Gabung ...
+type Gabung struct {
+	MstProduct
+	TranRCD
+}
+
+// DetailRC ...
+type DetailRC struct {
+	KodeProduct      string `db:"TranrcD_Procod" json:"KodeProduct"`
+	DeskripsiProduct string `db:"Pro_Name" json:"DeskripsiProduct"`
+	QuantityScan     int    `db:"TranrcD_QuantityScan" json:"QuantityScan"`
+	SellPack         int    `db:"Pro_SellPack" json:"SellPack"`
+	QuantityDO       int    `db:"TranrcD_QuantityRecv" json:"QuantityDO"`
+	QuantityStok     string `db:"TranrcD_QuantityStk" json:"QuantityStok"`
+	BatchNumber      string `db:"TranrcDB_BatchNumber" json:"BatchNumber"`
+}
+
+// HeaderRC ...
+type HeaderRC struct {
+	NomorReceive   string    `db:"TranrcH_NoTranrc" json:"NomorReceive"`
+	TanggalReceive time.Time `db:"TranrcH_TglTranrc" json:"TanggalReceive"`
+	KodePengirim   string    `db:"TranrcH_OutCodeTransf" json:"KodePengirim"`
+	Pengirim       string    `db:"TranrcH_Nip" json:"Pengirim"`
+	NomorTransfer  string    `db:"TranrcH_NoTransf" json:"NomorTransfer"`
+	QuantityStok   string    `db:"TranrcD_QuantityStk" json:"TranrcD_QuantityStk"`
+	StatusPrint    string    `db:"TranrcH_Flag" json:"StatusPrint"`
+}
+
+// JSONRC ...
+type JSONRC struct {
+	TransRCD []TranRCD `json:"transRC_D"`
+	TransRCH TranRCH   `json:"transRC_H"`
 }
