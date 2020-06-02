@@ -25,14 +25,14 @@ func New(client *httpclient.Client, baseURL string) Data {
 	return d
 }
 
-// GetOutletNameAddress ...
-func (d Data) GetOutletNameAddress(ctx context.Context, outcode string) (string, string, error) {
+// GetOutletName ...
+func (d Data) GetOutletName(ctx context.Context, outcode string) (outletEntity.Outlet, error) {
 	var JSON outletEntity.JSONTerima
 	var endpoint = d.baseURL + "TampilDataOutlet/" + outcode
 	_, err := d.client.GetJSON(ctx, endpoint, nil, &JSON)
 	if err != nil {
-		return JSON.Data.OutName.String, JSON.Data.OutAddress.String, errors.Wrap(err, "[DATA][GetOutletNameAddress]")
+		return JSON.Data, errors.Wrap(err, "[DATA][GetOutletName]")
 	}
 
-	return JSON.Data.OutName.String, JSON.Data.OutAddress.String, err
+	return JSON.Data, err
 }

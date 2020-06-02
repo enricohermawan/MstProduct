@@ -3,7 +3,9 @@ package product
 import (
 	"context"
 	"fmt"
+	outletEntity "product/internal/entity/outlet"
 	pEntity "product/internal/entity/product"
+
 	"product/pkg/errors"
 )
 
@@ -20,20 +22,26 @@ type mpData interface {
 	GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
 }
 
+type outletData interface {
+	GetOutletName(ctx context.Context, outcode string) (outletEntity.Outlet, error)
+}
+
 // Service ...
 // Tambahkan variable sesuai banyak data layer yang dibutuhkan
 type Service struct {
 	productData Data
 	mpData      mpData
+	outletData  outletData
 }
 
 // New ...
 // Tambahkan parameter sesuai banyak data layer yang dibutuhkan
-func New(productData Data, mpData mpData) Service {
+func New(productData Data, mpData mpData, outletData outletData) Service {
 	// Assign variable dari parameter ke object
 	return Service{
 		productData: productData,
 		mpData:      mpData,
+		outletData:  outletData,
 	}
 }
 
@@ -60,16 +68,31 @@ func (s Service) TampilDetailMP(ctx context.Context, kode string) (pEntity.MstPr
 // TampilAllHeaderDataReceive ...
 func (s Service) TampilAllHeaderDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error) {
 	var (
-		header []pEntity.HeaderRC
-		err    error
+		headers    []pEntity.HeaderRC
+		newHeaders []pEntity.HeaderRC
+		outlet     outletEntity.Outlet
+		err        error
 	)
 
-	header, err = s.productData.GetAllHeaderReceive(ctx)
+	headers, err = s.productData.GetAllHeaderReceive(ctx)
+	//Looping Insert Data from API
+	for _, header := range headers {
+		outlet, err = s.outletData.GetOutletName(ctx, header.KodePengirim.String)
+
+		if header.KodePengirim == outlet.OutCode {
+			header.Pengirim.SetValid(outlet.OutName.String)
+		}
+
+		newHeaders = append(newHeaders, header)
+	}
+	//Memasukan data baru ke dalam array Header
+	headers = newHeaders
+	//Error Handling
 	if err != nil {
-		return header, errors.Wrap(err, "[SERVICE][TampilAllHeaderDataReceive")
+		return headers, errors.Wrap(err, "[SERVICE][TampilAllHeaderDataReceive")
 	}
 
-	return header, err
+	return headers, err
 }
 
 // TampilDataByNoReceive ...

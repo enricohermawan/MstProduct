@@ -3,3 +3,5 @@ server:
 database:
     master: "root:@tcp(localhost:3306)/test"
 api:
+    mp: "https://api.docnet.id/CHCMasterProduk"
+    outlet: "https://api.docnet.id/CHCMasterH/MasterOutlet/"

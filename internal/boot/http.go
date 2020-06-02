@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	mpData "product/internal/data/mp"
+	outletData "product/internal/data/outlet"
 	productData "product/internal/data/product"
 	productServer "product/internal/delivery/http"
 	productHandler "product/internal/delivery/http/product"
@@ -21,6 +22,7 @@ func HTTP() error {
 	var (
 		srv      productServer.Server // HTTP Server Object
 		mpD      mpData.Data
+		outletD  outletData.Data
 		productD productData.Data        // Domain data layer
 		productS productService.Service  // Domain service layer
 		productH *productHandler.Handler // Domain handler
@@ -34,8 +36,9 @@ func HTTP() error {
 	cfg = config.Get()
 	// HTTP Client
 	httpc := httpclient.NewClient()
-
+	//API
 	mpD = mpData.New(httpc, cfg.API.MP)
+	outletD = outletData.New(httpc, cfg.API.Outlet)
 	// Open MySQL DB Connection
 	db, err := sqlx.Open("mysql", cfg.Database.Master)
 	if err != nil {
@@ -44,7 +47,7 @@ func HTTP() error {
 
 	// Diganti dengan domain yang anda buat
 	productD = productData.New(db)
-	productS = productService.New(productD, mpD)
+	productS = productService.New(productD, mpD, outletD)
 	productH = productHandler.New(productS)
 
 	srv = productServer.Server{

@@ -20,6 +20,7 @@ type (
 
 	// APIConfig ...
 	APIConfig struct {
-		MP string `yaml:"mp"`
+		MP     string `yaml:"mp"`
+		Outlet string `yaml:"outlet"`
 	}
 )
