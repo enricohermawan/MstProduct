@@ -24,13 +24,30 @@ type (
 )
 
 const (
-	tampilDetailDataByNoReceive  = "TampilDetailDataByNoReceive"
-	qtampilDetailDataByNoReceive = "SELECT * FROM MH_Product_Alvin JOIN TranRCD ON MH_Product_Alvin.Pro_Code = TranRCD.TranrcD_ProCod WHERE TranRCD.TranrcD_NoTranrc = ?"
+	getDataHeaderByNoReceive  = "GetDataHeaderByNoReceive"
+	qgetDataHeaderByNoReceive = `SELECT TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,TranrcH_Nip,
+	TranrcH_NoTransf,TranrcH_Flag FROM TranRCH WHERE TranrcH_NoTranrc = ?`
+
+	getDataDetailByNoReceive  = "GetDataDetailByNoReceive"
+	qgetDataDetailByNoReceive = `SELECT TranrcD_Procod,TranrcD_QuantityScan,TranrcD_QuantityRecv,TranrcD_QuantityStk,
+	TranrcDB_BatchNumber FROM TranRCD WHERE TranrcD_NoTranrc = ?`
+
+	getAllDetailReceive  = "GetAllDetailReceive"
+	qgetAllDetailReceive = `SELECT TranrcD_Procod,TranrcD_QuantityScan,TranrcD_QuantityRecv,TranrcD_QuantityStk,
+	TranrcDB_BatchNumber FROM TranRCD `
+
+	getAllHeaderReceive  = "GetAllHeaderReceive"
+	qgetAllHeaderReceive = `SELECT TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,
+	TranrcH_NoTransf,TranrcH_Flag FROM TranRCH WHERE TranrcH_DataAktifYN = 'Y'`
 )
 
 var (
 	readStmt = []statement{
-		{tampilDetailDataByNoReceive, qtampilDetailDataByNoReceive},
+
+		{getAllDetailReceive, qgetAllDetailReceive},
+		{getAllHeaderReceive, qgetAllHeaderReceive},
+		{getDataDetailByNoReceive, qgetDataDetailByNoReceive},
+		{getDataHeaderByNoReceive, qgetDataHeaderByNoReceive},
 	}
 )
 
@@ -60,19 +77,73 @@ func (d *Data) initStmt() {
 	d.stmt = stmts
 }
 
-// TampilDetailReceiveByNoReceive ..
-func (d Data) TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error) {
+// GetAllHeaderReceive ...
+func (d Data) GetAllHeaderReceive(ctx context.Context) ([]pEntity.HeaderRC, error) {
 	var (
-		product pEntity.Gabung
+		rows    *sqlx.Rows
+		header  pEntity.HeaderRC
+		headers []pEntity.HeaderRC
 		err     error
 	)
-
-	// Query ke database
-	err = d.stmt[tampilDetailDataByNoReceive].QueryRowxContext(ctx, NoTranrc).StructScan(&product)
-
-	if err != nil {
-		return product.MstProduct, errors.Wrap(err, "[DATA][TampilDetailReceiveByNoReceive]")
+	rows, err = d.stmt[getAllHeaderReceive].QueryxContext(ctx)
+	for rows.Next() {
+		if err := rows.StructScan(&header); err != nil {
+			return headers, errors.Wrap(err, "[DATA][GetAllDetailReceive] ")
+		}
+		headers = append(headers, header)
 	}
 
-	return product.MstProduct, err
+	return headers, err
+}
+
+// GetAllDetailReceive ...
+func (d Data) GetAllDetailReceive(ctx context.Context) ([]pEntity.DetailRC, error) {
+	var (
+		rows    *sqlx.Rows
+		detail  pEntity.DetailRC
+		details []pEntity.DetailRC
+		err     error
+	)
+	rows, err = d.stmt[getAllDetailReceive].QueryxContext(ctx)
+	for rows.Next() {
+		if err := rows.StructScan(&detail); err != nil {
+			return details, errors.Wrap(err, "[DATA][GetAllDetailReceive] ")
+		}
+		details = append(details, detail)
+	}
+
+	return details, err
+}
+
+// GetDataHeaderByNoReceive ...
+func (d Data) GetDataHeaderByNoReceive(ctx context.Context, NoTranrc string) (pEntity.HeaderRC, error) {
+	var (
+		header pEntity.HeaderRC
+		err    error
+	)
+
+	if err := d.stmt[getDataHeaderByNoReceive].QueryRowxContext(ctx, NoTranrc).StructScan(&header); err != nil {
+		return header, errors.Wrap(err, "[DATA][GetDataHeaderByNoReceive]")
+	}
+
+	return header, err
+}
+
+// GetDataDetailByNoReceive ...
+func (d Data) GetDataDetailByNoReceive(ctx context.Context, NoTranrc string) ([]pEntity.DetailRC, error) {
+	var (
+		rows    *sqlx.Rows
+		detail  pEntity.DetailRC
+		details []pEntity.DetailRC
+		err     error
+	)
+	rows, err = d.stmt[getDataDetailByNoReceive].QueryxContext(ctx, NoTranrc)
+	for rows.Next() {
+		if err := rows.StructScan(&detail); err != nil {
+			return details, errors.Wrap(err, "[DATA][GetDataDetailByNoReceive] ")
+		}
+		details = append(details, detail)
+	}
+
+	return details, err
 }

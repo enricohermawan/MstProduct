@@ -16,7 +16,10 @@ import (
 // Masukkan function dari service ke dalam interface ini
 type IProductSvc interface {
 	TampilDetailMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
-	TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error)
+	// TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error)
+	InsertDataDetailFromAPI(ctx context.Context, NoTranrc string) ([]pEntity.DetailRC, error)
+	TampilAllDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error)
+	TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pEntity.JSONRCByNoReceive, error)
 }
 
 type (
@@ -67,8 +70,12 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 					NoTranrc string
 				)
 				NoTranrc = r.FormValue("NoTranrc")
-				result, err = h.ProductSvc.TampilDetailReceiveByNoReceive(context.Background(), NoTranrc)
+				result, err = h.ProductSvc.TampilDataByNoReceive(context.Background(), NoTranrc)
 			}
+
+		case 0:
+			result, err = h.ProductSvc.TampilAllDataReceive(context.Background())
+
 		}
 
 	// Check if request method is POST
