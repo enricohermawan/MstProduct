@@ -18,7 +18,6 @@ type Data interface {
 
 type mpData interface {
 	GetAllJSONMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
-	GetAllDataMstProduct(ctx context.Context) (pEntity.MstProduct, error)
 }
 
 // Service ...
@@ -58,38 +57,8 @@ func (s Service) TampilDetailMP(ctx context.Context, kode string) (pEntity.MstPr
 	return product, err
 }
 
-// InsertDataDetailFromAPI ...
-func (s Service) InsertDataDetailFromAPI(ctx context.Context, NoTranrc string) ([]pEntity.DetailRC, error) {
-	var (
-		err        error
-		details    []pEntity.DetailRC
-		newDetail  pEntity.DetailRC
-		newDetails []pEntity.DetailRC
-		produk     pEntity.MstProduct
-	)
-
-	details, err = s.productData.GetDataDetailByNoReceive(ctx, NoTranrc)
-	for _, detail := range details {
-		produk, err = s.mpData.GetAllJSONMP(ctx, produk.ProCode.String)
-		newDetail = detail
-		fmt.Println("json : ", newDetail)
-		if detail.KodeProduct == produk.ProCode {
-			newDetail.DeskripsiProduct.SetValid(produk.ProName.String)
-			newDetail.SellPack.SetValid(produk.ProSellPack.Int64)
-			newDetail.ExpDate.SetValid(produk.ProExpDateYN.String)
-		}
-
-		if err != nil {
-			return newDetails, errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI2")
-		}
-		newDetails = append(newDetails, newDetail)
-	}
-
-	return newDetails, err
-}
-
-// TampilAllDataReceive ...
-func (s Service) TampilAllDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error) {
+// TampilAllHeaderDataReceive ...
+func (s Service) TampilAllHeaderDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error) {
 	var (
 		header []pEntity.HeaderRC
 		err    error
@@ -97,13 +66,8 @@ func (s Service) TampilAllDataReceive(ctx context.Context) ([]pEntity.HeaderRC, 
 
 	header, err = s.productData.GetAllHeaderReceive(ctx)
 	if err != nil {
-		return header, errors.Wrap(err, "[SERVICE][GetAllDataHeaderReceiveByNoTranrc")
+		return header, errors.Wrap(err, "[SERVICE][TampilAllHeaderDataReceive")
 	}
-
-	// receive.DetailRC, err = s.productData.GetAllDetailReceive(ctx)
-	// if err != nil {
-	// 	return receive, errors.Wrap(err, "[SERVICE][GetAllDataDetailReceiveByNoTranrc")
-	// }
 
 	return header, err
 }
@@ -124,7 +88,9 @@ func (s Service) TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pE
 
 	//Tampil Detail
 	dataReceive.DetailRC, err = s.productData.GetDataDetailByNoReceive(ctx, NoTranrc)
+	//Test print raw data yang diterima
 	fmt.Println("receive : ", dataReceive.DetailRC)
+	//Looping Insert Data from API
 	for _, detail := range dataReceive.DetailRC {
 		produk, err = s.mpData.GetAllJSONMP(ctx, detail.KodeProduct.String)
 
@@ -138,7 +104,9 @@ func (s Service) TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pE
 		fmt.Println("Detail : ", detail)
 		fmt.Println("newDetails : ", newDetails)
 	}
+	//Memasukan data baru ke dalam array Detail
 	dataReceive.DetailRC = newDetails
+	//Error Handling
 	if err != nil {
 		return dataReceive, errors.Wrap(err, "[SERVICE][GetDataByNoReceiveHeader")
 	}

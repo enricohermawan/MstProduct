@@ -25,7 +25,7 @@ type (
 
 const (
 	getDataHeaderByNoReceive  = "GetDataHeaderByNoReceive"
-	qgetDataHeaderByNoReceive = `SELECT TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,TranrcH_Nip,
+	qgetDataHeaderByNoReceive = `SELECT TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,
 	TranrcH_NoTransf,TranrcH_Flag FROM TranRCH WHERE TranrcH_NoTranrc = ?`
 
 	getDataDetailByNoReceive  = "GetDataDetailByNoReceive"

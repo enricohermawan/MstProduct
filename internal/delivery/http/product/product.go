@@ -17,8 +17,7 @@ import (
 type IProductSvc interface {
 	TampilDetailMP(ctx context.Context, kode string) (pEntity.MstProduct, error)
 	// TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error)
-	InsertDataDetailFromAPI(ctx context.Context, NoTranrc string) ([]pEntity.DetailRC, error)
-	TampilAllDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error)
+	TampilAllHeaderDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error)
 	TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pEntity.JSONRCByNoReceive, error)
 }
 
@@ -74,7 +73,7 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case 0:
-			result, err = h.ProductSvc.TampilAllDataReceive(context.Background())
+			result, err = h.ProductSvc.TampilAllHeaderDataReceive(context.Background())
 
 		}
 
