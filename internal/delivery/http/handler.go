@@ -20,6 +20,7 @@ func (s *Server) Handler() *mux.Router {
 	sub.HandleFunc("/", defaultHandler).Methods("GET")
 	sub.HandleFunc("/", defaultHandler).Methods("GET")
 	sub.HandleFunc("/Product", s.Product.ProductHandler).Methods("GET")
+	sub.HandleFunc("/GetData", s.Product.ProductHandler).Methods("POST")
 	return r
 }
 

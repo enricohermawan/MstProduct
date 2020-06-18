@@ -22,5 +22,6 @@ type (
 	APIConfig struct {
 		MP     string `yaml:"mp"`
 		Outlet string `yaml:"outlet"`
+		DO     string `yaml:"do"`
 	}
 )

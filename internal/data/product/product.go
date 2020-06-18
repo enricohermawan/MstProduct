@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"log"
+	doEntity "product/internal/entity/do"
 	pEntity "product/internal/entity/product"
 	"product/pkg/errors"
 
@@ -39,6 +40,24 @@ const (
 	getAllHeaderReceive  = "GetAllHeaderReceive"
 	qgetAllHeaderReceive = `SELECT TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,
 	TranrcH_NoTransf,TranrcH_Flag FROM TranRCH WHERE TranrcH_DataAktifYN = 'Y'`
+
+	insertDataHeaderFromAPI  = "InsertDataHeaderFromAPI"
+	qinsertDataHeaderFromAPI = "INSERT INTO TransfH VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
+	insertDataDetailFromAPI  = "InsertDataDetailFromAPI"
+	qinsertDataDetailFromAPI = "INSERT INTO TransfD VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
+	editDataDetail  = "EditDataDetail"
+	qEditDataDetail = `UPDATE TransfD
+	SET
+	TransfD_BatchNumber = ?,
+	TransfD_Qty_Scan = ?
+	WHERE TransfD_NoTransf = ? AND TransfD_Procod = ?`
+
+	printReceive  = "PrintReceive"
+	qprintReceive = `SELECT TranrcH_NoTransf,TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,
+	TranrcH_OutCodeTranrc,TranrcD_Procod,TranrcD_QuantityScan FROM TranRCD JOIN TranRCH ON TranRCD.TranrcD_NoTransf
+	= TranRCH.TranrcH_NoTransf WHERE TranrcH_NoTransf = ? AND TranrcH_NoTranrc = ?`
 )
 
 var (
@@ -48,6 +67,10 @@ var (
 		{getAllHeaderReceive, qgetAllHeaderReceive},
 		{getDataDetailByNoReceive, qgetDataDetailByNoReceive},
 		{getDataHeaderByNoReceive, qgetDataHeaderByNoReceive},
+		{insertDataHeaderFromAPI, qinsertDataHeaderFromAPI},
+		{insertDataDetailFromAPI, qinsertDataDetailFromAPI},
+		{editDataDetail, qEditDataDetail},
+		{printReceive, qprintReceive},
 	}
 )
 
@@ -146,4 +169,105 @@ func (d Data) GetDataDetailByNoReceive(ctx context.Context, NoTranrc string) ([]
 	}
 
 	return details, err
+}
+
+// InsertDataHeaderFromAPI ...
+func (d Data) InsertDataHeaderFromAPI(ctx context.Context, header doEntity.TransfH) error {
+	var err error
+	if _, err = d.stmt[insertDataHeaderFromAPI].ExecContext(ctx,
+		header.TransfHOutCodeTransf,
+		header.TransfHNoTransf,
+		header.TransfHTglTransf,
+		header.TransfHOutCodeDest,
+		header.TransfHGroup,
+		header.TransfHOutCodeSP,
+		header.TransfHNoSP,
+		header.TransfHTglSP,
+		header.TransfHFlag,
+		header.TransfHFlagTrf,
+		header.TransfHTglDwld,
+		header.TransfHFlagSttk,
+		header.TransfHTranno,
+		header.TransfHUpload,
+		header.TransfHTransfer,
+		header.TransFHLapakYN,
+		header.TransfHActiveYN,
+		header.TransfHUserID,
+		header.TransfHLastUpdate,
+		header.TransfHDataAktifYN,
+		header.TransfHOrderID,
+		header.TransfHSPID,
+		header.TransfHPaymentMethod); err != nil {
+		return errors.Wrap(err, "[DATA][InsertDataHeaderFromAPI]")
+	}
+	return err
+
+}
+
+// InsertDataDetailFromAPI ...
+func (d Data) InsertDataDetailFromAPI(ctx context.Context, detail doEntity.TransfD) error {
+	var err error
+	if _, err = d.stmt[insertDataHeaderFromAPI].ExecContext(ctx,
+		detail.TransfDOutCodeTransf,
+		detail.TransfDNoTransf,
+		detail.TransfDGroup,
+		detail.TransfDOutCodeSP,
+		detail.TransfDNoSP,
+		detail.TransfDProCod,
+		detail.TransfDBatchNumber,
+		detail.TransfDED,
+		detail.TransfDQty,
+		detail.TransfDQtyScan,
+		detail.TransfDQtyStk,
+		detail.TransfDOutCodeOrder,
+		detail.TransfDNoOrder,
+		detail.TransFDCategoryProduct,
+		detail.TransFDEditYN,
+		detail.TransfDActiveYN,
+		detail.TransfDUserID,
+		detail.TransfDLastUpdate,
+		detail.TransfDDataAktifYN,
+		detail.TransfDSPID,
+		detail.TransfDSalePrice,
+		detail.TransfDDiscount); err != nil {
+		return errors.Wrap(err, "[DATA][InsertDataDetailFromAPI]")
+	}
+	return err
+
+}
+
+// EditDetailOrderByNoTransfandProcode ...
+func (d Data) EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error {
+	var (
+		err error
+	)
+	if _, err := d.stmt[editDataDetail].ExecContext(ctx,
+		detail.TransfDBatchNumber,
+		detail.TransfDQtyScan,
+		noTransf,
+		procod); err != nil {
+		return errors.Wrap(err, "[DATA][EditDetailOrderByNoTransfandProcode] ")
+	}
+	return err
+}
+
+// PrintReceive ...
+func (d Data) PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error) {
+	var (
+		rows     *sqlx.Rows
+		receive  pEntity.JSONPrintReceive
+		receives []pEntity.JSONPrintReceive
+		err      error
+	)
+	rows, err = d.stmt[printReceive].QueryxContext(ctx,
+		noTransf,
+		NoTranrc)
+	for rows.Next() {
+		if err := rows.StructScan(&receive); err != nil {
+			return receives, errors.Wrap(err, "[DATA][PrintReceive] ")
+		}
+		receives = append(receives, receive)
+	}
+
+	return receives, err
 }

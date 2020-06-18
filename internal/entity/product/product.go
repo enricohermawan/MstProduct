@@ -246,3 +246,56 @@ type DetailDanTranRCD struct {
 	TranRCD
 	DetailRC
 }
+
+// TransfD ...
+type TransfD struct {
+	TransfDRunningID     string `db:"TransfD_RunningID" json:"TransfD_RunningID"`
+	TransfDOutCodeTransf string `db:"TransfD_OutCodeTransf" json:"TransfD_OutCodeTransf"`
+	TransfDNoTransf      string `db:"TransfD_NoTransf" json:"TransfD_NoTransf"`
+	TransfDOutCodeTranrc string `db:"TransfD_OutCodeTranrc" json:"TransfD_OutCodeTranrc"`
+	TransfDDNoTranrc     string `db:"TransfD_NoTranrc" json:"TransfD_NoTranrc"`
+	TransfDProcod        string `db:"TransfD_Procod" json:"TransfD_Procod"`
+	TransfDBBatchNumber  string `db:"TransfD_BatchNumber" json:"TransfD_BatchNumber"`
+	TransfDBKonsentrasi  string `db:"TransfD_Konsentrasi" json:"TransfD_Konsentrasi"`
+	TransfDQuantityRecv  string `db:"TransfD_QuantityRecv" json:"TransfD_QuantityRecv"`
+	TransfDQuantityScan  string `db:"TransfD_QuantityScan" json:"TransfD_QuantityScan"`
+	TransfDQuantityStk   string `db:"TransfD_QuantityStk" json:"TransfD_QuantityStk"`
+	TransfDOutCodeOR     string `db:"TransfD_OutCodeOR" json:"TransfD_OutCodeOR"`
+	TransfDNoOR          string `db:"TransfD_NoOR" json:"TransfD_NoOR"`
+	TransfDQuantityOR    string `db:"TransfD_QuantityOR" json:"TransfD_QuantityOR"`
+	TransfDActiveYN      string `db:"TransfD_ActiveYN" json:"TransfD_ActiveYN"`
+	TransfDUserID        string `db:"TransfD_UserId" json:"TransfD_UserId"`
+	TransfDlastUpdate    string `db:"TransfD_lastUpdate" json:"TransfD_lastUpdate"`
+	TransfDDataAktifYN   string `db:"TransfD_DataAktifYN" json:"TransfD_DataAktifYN"`
+}
+
+// TransfH ...
+type TransfH struct {
+	TransfHRunningID     string    `db:"TranrsfH_RunningID" json:"TranrsfH_RunningID"`
+	TransfHOutCodeTransf string    `db:"TranrsfH_OutCodeTransf" json:"TranrsfH_OutCodeTransf"`
+	TransfHNoTransf      string    `db:"TranrsfH_NoTransf" json:"TranrsfH_NoTransf"`
+	TransfHOutCodeTranrc string    `db:"TranrsfH_OutCodeTranrc" json:"TranrsfH_OutCodeTranrc"`
+	TransfHNoTranrc      string    `db:"TransfH_NoTranrc" json:"TransfH_NoTranrc"`
+	TransfHTglTranrc     time.Time `db:"TransfH_TglTranrc" json:"TransfH_TglTranrc"`
+	TransfHFlag          string    `db:"TransfH_Flag" json:"TransfH_Flag"`
+	TransfHFlagTrf       string    `db:"TransfH_FlagTrf" json:"TransfH_FlagTrf"`
+	TransfHTglDwld       string    `db:"TransfH_TglDwld" json:"TransfH_TglDwld"`
+	TransfHNip           string    `db:"TransfH_Nip" json:"TransfH_Nip"`
+	TransfHActiveYN      string    `db:"TransfH_ActiveYN" json:"TransfH_ActiveYN"`
+	TransfHUserID        string    `db:"TransfH_UserId" json:"TransfH_UserId"`
+	TransfHlastUpdate    time.Time `db:"TransfH_lastUpdate" json:"TransfH_lastUpdate"`
+	TransfHDataAktifYN   string    `db:"TransfH_DataAktifYN" json:"TransfH_DataAktifYN"`
+}
+
+// JSONPrintReceive ...
+type JSONPrintReceive struct {
+	NomorTransfer    zero.String `db:"TranrcH_NoTransf" json:"NomorTransfer"`
+	NomorReceive     zero.String `db:"TranrcH_NoTranrc" json:"NomorReceive"`
+	TangaalReceive   time.Time   `db:"TranrcH_TglTranrc" json:"TangaalReceive"`
+	Pengirim         zero.String `db:"TranrcH_OutCodeTransf" json:"Pengirim"`
+	Penerima         zero.String `db:"TranrcH_OutCodeTranrc" json:"Penerima"`
+	KodeProduct      zero.String `db:"TranrcD_Procod" json:"KodeProduct"`
+	DeskripsiProduct zero.String `db:"" json:"DeskripsiProduct"`
+	Jumlah           zero.Int    `db:"TranrcD_QuantityScan" json:"Jumlah"`
+	Satuan           zero.Int    `db:"" json:"Satuan"`
+}

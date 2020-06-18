@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"fmt"
+	doEntity "product/internal/entity/do"
 	outletEntity "product/internal/entity/outlet"
 	pEntity "product/internal/entity/product"
 
@@ -16,6 +17,10 @@ type Data interface {
 	GetAllDetailReceive(ctx context.Context) ([]pEntity.DetailRC, error)
 	GetDataHeaderByNoReceive(ctx context.Context, NoTranrc string) (pEntity.HeaderRC, error)
 	GetDataDetailByNoReceive(ctx context.Context, NoTranrc string) ([]pEntity.DetailRC, error)
+	InsertDataHeaderFromAPI(ctx context.Context, header doEntity.TransfH) error
+	InsertDataDetailFromAPI(ctx context.Context, detail doEntity.TransfD) error
+	EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error
+	PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error)
 }
 
 type mpData interface {
@@ -26,22 +31,29 @@ type outletData interface {
 	GetOutletName(ctx context.Context, outcode string) (outletEntity.Outlet, error)
 }
 
+type doData interface {
+	GetAllHeaderJSONDO(ctx context.Context, noTransf string) (doEntity.TransfH, error)
+	GetAllDetailJSONDO(ctx context.Context, noTransf string) ([]doEntity.TransfD, error)
+}
+
 // Service ...
 // Tambahkan variable sesuai banyak data layer yang dibutuhkan
 type Service struct {
 	productData Data
 	mpData      mpData
 	outletData  outletData
+	doData      doData
 }
 
 // New ...
 // Tambahkan parameter sesuai banyak data layer yang dibutuhkan
-func New(productData Data, mpData mpData, outletData outletData) Service {
+func New(productData Data, mpData mpData, outletData outletData, doData doData) Service {
 	// Assign variable dari parameter ke object
 	return Service{
 		productData: productData,
 		mpData:      mpData,
 		outletData:  outletData,
+		doData:      doData,
 	}
 }
 
@@ -136,4 +148,123 @@ func (s Service) TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pE
 
 	//return Header dan Detail
 	return dataReceive, err
+}
+
+// TampilDataDO ...
+func (s Service) TampilDataDO(ctx context.Context, noTransf string) (doEntity.JSONDO, error) {
+	var (
+		order doEntity.JSONDO
+		err   error
+	)
+
+	order.Header, err = s.doData.GetAllHeaderJSONDO(ctx, noTransf)
+	if err != nil {
+		return order, errors.Wrap(err, "[SERVICE][TampilDataDOHeader")
+	}
+	fmt.Println("getHeader : ", order.Header)
+
+	order.Detail, err = s.doData.GetAllDetailJSONDO(ctx, noTransf)
+	if err != nil {
+		return order, errors.Wrap(err, "[SERVICE][TampilDataDODetail")
+	}
+
+	return order, err
+}
+
+// InsertDataFromAPI ...
+func (s Service) InsertDataFromAPI(ctx context.Context, noTransf string) error {
+	var (
+		header  doEntity.TransfH
+		details []doEntity.TransfD
+		err     error
+	)
+	//insertHeader
+	header, err = s.doData.GetAllHeaderJSONDO(ctx, noTransf)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][InsertDataHeaderFromAPI1")
+	}
+	err = s.productData.InsertDataHeaderFromAPI(ctx, header)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][InsertDataHeaderFromAPI2")
+	}
+	fmt.Println("Header : ", header)
+
+	//insertDetail
+	for _, detail := range details {
+		details, err = s.doData.GetAllDetailJSONDO(ctx, noTransf)
+
+		if err != nil {
+			return errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI1")
+		}
+
+		err = s.productData.InsertDataDetailFromAPI(ctx, detail)
+		if err != nil {
+			return errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI2")
+		}
+	}
+	return err
+}
+
+// EditDetailOrderByNoTransfandProcode ...
+func (s Service) EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error {
+	var (
+		details []doEntity.TransfD
+		err     error
+	)
+	for _, detail := range details {
+		details, err = s.doData.GetAllDetailJSONDO(ctx, noTransf)
+		if err != nil {
+			return errors.Wrap(err, "[SERVICE][EditDetailOrderByNoTransfandProcodeGET")
+		}
+		err = s.productData.EditDetailOrderByNoTransfandProcode(ctx, detail, noTransf, procod)
+		if err != nil {
+			return errors.Wrap(err, "[SERVICE][EditDetailOrderByNoTransfandProcode")
+		}
+	}
+
+	return err
+}
+
+// PrintReceive ...
+func (s Service) PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error) {
+	var (
+		receives    []pEntity.JSONPrintReceive
+		newReceives []pEntity.JSONPrintReceive
+		produk      pEntity.MstProduct
+		outlet      outletEntity.Outlet
+		err         error
+	)
+
+	//Tampil Detail
+	receives, err = s.productData.PrintReceive(ctx, noTransf, NoTranrc)
+	//Test print raw data yang diterima
+	fmt.Println("receive : ", receives)
+	//Looping Insert Data from API
+	for _, receive := range receives {
+		produk, err = s.mpData.GetAllJSONMP(ctx, receive.KodeProduct.String)
+		outlet, err = s.outletData.GetOutletName(ctx, receive.Pengirim.String)
+		outlet, err = s.outletData.GetOutletName(ctx, receive.Penerima.String)
+
+		if receive.KodeProduct == produk.ProCode {
+			receive.DeskripsiProduct.SetValid(produk.ProName.String)
+			receive.Satuan.SetValid(produk.ProSellPack.Int64)
+		} else if receive.Pengirim == outlet.OutCode {
+			receive.Pengirim.SetValid(outlet.OutName.String)
+		} else if receive.Penerima == outlet.OutCode {
+			receive.Penerima.SetValid(outlet.OutName.String)
+		}
+
+		newReceives = append(newReceives, receive)
+		fmt.Println("Detail : ", receive)
+		fmt.Println("newDetails : ", newReceives)
+	}
+	//Memasukan data baru ke dalam array Detail
+	receives = newReceives
+	//Error Handling
+	if err != nil {
+		return receives, errors.Wrap(err, "[SERVICE][PrintReceive")
+	}
+
+	//return Header dan Detail
+	return receives, err
 }

@@ -5,3 +5,4 @@ database:
 api:
     mp: "https://api.docnet.id/CHCMasterProduk"
     outlet: "https://api.docnet.id/CHCMasterH/MasterOutlet/"
+    do: "https://api.docnet.id/CHCDO/DO"

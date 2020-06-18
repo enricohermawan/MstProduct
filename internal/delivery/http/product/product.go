@@ -2,14 +2,16 @@ package product
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 
-	"product/pkg/response"
-
+	doEntity "product/internal/entity/do"
 	pEntity "product/internal/entity/product"
+	"product/pkg/response"
 )
 
 // IProductSvc is an interface to Skeleton Service
@@ -19,6 +21,10 @@ type IProductSvc interface {
 	// TampilDetailReceiveByNoReceive(ctx context.Context, NoTranrc string) (pEntity.MstProduct, error)
 	TampilAllHeaderDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error)
 	TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pEntity.JSONRCByNoReceive, error)
+	TampilDataDO(ctx context.Context, noTransf string) (doEntity.JSONDO, error)
+	InsertDataFromAPI(ctx context.Context, noTransf string) error
+	EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error
+	PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error)
 }
 
 type (
@@ -54,9 +60,22 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 		paramMap := r.URL.Query()
 		len := len(paramMap)
 		switch len {
+		case 2:
+			_, NoTranrcOK := paramMap["NoTranrc"]
+			_, NoTransfOK := paramMap["NoTransf"]
+			if NoTranrcOK && NoTransfOK {
+				var (
+					NoTranrc string
+					noTransf string
+				)
+				NoTranrc = r.FormValue("NoTranrc")
+				noTransf = r.FormValue("NoTransf")
+				result, err = h.ProductSvc.PrintReceive(context.Background(), noTransf, NoTranrc)
+			}
 		case 1:
 			_, getKodeOK := paramMap["kode"]
 			_, NoTranrcOK := paramMap["NoTranrc"]
+			_, NoTransfOK := paramMap["NoTransf"]
 			if getKodeOK {
 				var (
 					kode string
@@ -70,6 +89,13 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 				)
 				NoTranrc = r.FormValue("NoTranrc")
 				result, err = h.ProductSvc.TampilDataByNoReceive(context.Background(), NoTranrc)
+			} else if NoTransfOK {
+				var (
+					noTransf string
+				)
+
+				noTransf = r.FormValue("NoTransf")
+				result, err = h.ProductSvc.TampilDataDO(context.Background(), noTransf)
 			}
 
 		case 0:
@@ -79,6 +105,32 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if request method is POST
 	case http.MethodPost:
+		paramMap := r.URL.Query()
+		len := len(paramMap)
+		switch len {
+		case 3:
+			var editProduct doEntity.EditProduct
+			_, NoTransfOK := r.URL.Query()["NoTransf"]
+			_, ProcodOK := r.URL.Query()["Procod"]
+			// _, totalPriceOK := r.URL.Query()["totalPrice"]
+			body, _ := ioutil.ReadAll(r.Body)
+			// totalPrice, _ := strconv.Atoi(r.FormValue("totalPrice"))
+
+			if NoTransfOK && ProcodOK {
+				json.Unmarshal(body, &editProduct)
+				err = h.ProductSvc.EditDetailOrderByNoTransfandProcode(context.Background(), editProduct.Detail, r.FormValue("NoTransf"), r.FormValue("Procod"))
+			}
+		case 1:
+			var noTransf string
+			var insert doEntity.JSONDO
+			_, noTransfOK := r.URL.Query()["NoTransf"]
+			body, _ := ioutil.ReadAll(r.Body)
+			if noTransfOK {
+				json.Unmarshal(body, &insert)
+				err = h.ProductSvc.InsertDataFromAPI(context.Background(), noTransf)
+			}
+
+		}
 
 	// Check if request method is PUT
 	case http.MethodPut:
