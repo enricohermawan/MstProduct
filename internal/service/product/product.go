@@ -19,7 +19,7 @@ type Data interface {
 	GetDataDetailByNoReceive(ctx context.Context, NoTranrc string) ([]pEntity.DetailRC, error)
 	InsertDataHeaderFromAPI(ctx context.Context, header doEntity.TransfH) error
 	InsertDataDetailFromAPI(ctx context.Context, detail doEntity.TransfD) error
-	EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error
+	EditDetailOrderByNoTransfandProcode(ctx context.Context, noTransf string, procod string, detail doEntity.TransfD) (doEntity.TransfD, error)
 	PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error)
 }
 
@@ -172,56 +172,51 @@ func (s Service) TampilDataDO(ctx context.Context, noTransf string) (doEntity.JS
 }
 
 // InsertDataFromAPI ...
-func (s Service) InsertDataFromAPI(ctx context.Context, noTransf string) error {
+func (s Service) InsertDataFromAPI(ctx context.Context, noTransf string) (doEntity.JSONDO, error) {
 	var (
-		header  doEntity.TransfH
-		details []doEntity.TransfD
-		err     error
+		order doEntity.JSONDO
+		err   error
 	)
+	//getHeader
+	order.Header, err = s.doData.GetAllHeaderJSONDO(ctx, noTransf)
+	if err != nil {
+		return order, errors.Wrap(err, "[SERVICE][TampilDataHeaderFromAPI1")
+	}
+	fmt.Println("getHeader : ", order.Header)
 	//insertHeader
-	header, err = s.doData.GetAllHeaderJSONDO(ctx, noTransf)
+	err = s.productData.InsertDataHeaderFromAPI(ctx, order.Header)
 	if err != nil {
-		return errors.Wrap(err, "[SERVICE][InsertDataHeaderFromAPI1")
+		return order, errors.Wrap(err, "[SERVICE][InsertDataHeaderFromAPI2")
 	}
-	err = s.productData.InsertDataHeaderFromAPI(ctx, header)
-	if err != nil {
-		return errors.Wrap(err, "[SERVICE][InsertDataHeaderFromAPI2")
-	}
-	fmt.Println("Header : ", header)
 
+	//getDetail
+	order.Detail, err = s.doData.GetAllDetailJSONDO(ctx, noTransf)
+	if err != nil {
+		return order, errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI1")
+	}
 	//insertDetail
-	for _, detail := range details {
-		details, err = s.doData.GetAllDetailJSONDO(ctx, noTransf)
-
-		if err != nil {
-			return errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI1")
-		}
-
+	for _, detail := range order.Detail {
+		//insertDetail
 		err = s.productData.InsertDataDetailFromAPI(ctx, detail)
 		if err != nil {
-			return errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI2")
+			return order, errors.Wrap(err, "[SERVICE][InsertDataDetailFromAPI2")
 		}
 	}
-	return err
+	return order, err
 }
 
 // EditDetailOrderByNoTransfandProcode ...
-func (s Service) EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error {
+func (s Service) EditDetailOrderByNoTransfandProcode(ctx context.Context, noTransf string, procod string, detail doEntity.TransfD) error {
 	var (
-		details []doEntity.TransfD
-		err     error
+		err error
 	)
-	for _, detail := range details {
-		details, err = s.doData.GetAllDetailJSONDO(ctx, noTransf)
-		if err != nil {
-			return errors.Wrap(err, "[SERVICE][EditDetailOrderByNoTransfandProcodeGET")
-		}
-		err = s.productData.EditDetailOrderByNoTransfandProcode(ctx, detail, noTransf, procod)
-		if err != nil {
-			return errors.Wrap(err, "[SERVICE][EditDetailOrderByNoTransfandProcode")
-		}
-	}
 
+	detail, err = s.productData.EditDetailOrderByNoTransfandProcode(ctx, noTransf, procod, detail)
+	fmt.Println("data : ", detail)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][GetAllUsers]")
+	}
+	// Return users array
 	return err
 }
 
@@ -268,3 +263,58 @@ func (s Service) PrintReceive(ctx context.Context, noTransf string, NoTranrc str
 	//return Header dan Detail
 	return receives, err
 }
+
+// // PrintReceive ...
+// func (s Service) PrintReceive(ctx context.Context, noTransf string, NoTranrc string) (pEntity.JSONPrintReceive, error) {
+// 	var (
+// 		receive pEntity.JSONPrintReceive
+// 		receives    []pEntity.JSONPrintReceive
+// 		lists []pEntity.JSONintiPrintReceive
+// 		newReceives []pEntity.JSONPrintReceive
+// 		produk      pEntity.MstProduct
+// 		outlet      outletEntity.Outlet
+// 		err         error
+// 	)
+
+// 	//Tampil Detail
+// 	receive, err = s.productData.PrintReceive(ctx, noTransf, NoTranrc)
+// 	//Test print raw data yang diterima
+// 	fmt.Println("receive : ", receives)
+// 	//Looping Insert Data from API
+// 	for _, receive := range receives {
+// 		//produk, err = s.mpData.GetAllJSONMP(ctx, receive.KodeProduct.String)
+// 		outlet, err = s.outletData.GetOutletName(ctx, receive.Pengirim.String)
+// 		outlet, err = s.outletData.GetOutletName(ctx, receive.Penerima.String)
+
+// 		//if receive.KodeProduct == produk.ProCode {
+// 		//	receive.DeskripsiProduct.SetValid(produk.ProName.String)
+// 		//	receive.Satuan.SetValid(produk.ProSellPack.Int64)
+// 		//} else
+// 		if receive.Pengirim == outlet.OutCode {
+// 			receive.Pengirim.SetValid(outlet.OutName.String)
+// 		} else if receive.Penerima == outlet.OutCode {
+// 			receive.Penerima.SetValid(outlet.OutName.String)
+// 		}
+
+// 		newReceives = append(newReceives, receive)
+// 		fmt.Println("Detail : ", receive)
+// 		fmt.Println("newDetails : ", newReceives)
+// 	}
+
+// 	for _, list := range lists {
+// 		produk, err = s.mpData.GetAllJSONMP(ctx, list.KodeProduct.String)
+// 		if list.KodeProduct == produk.ProCode {
+// 			list.DeskripsiProduct.SetValid(produk.ProName.String)
+// 			list.Satuan.SetValid(produk.ProSellPack.Int64)
+// 		}
+// 	}
+// 	//Memasukan data baru ke dalam array Detail
+// 	receives = newReceives
+// 	//Error Handling
+// 	if err != nil {
+// 		return receives, errors.Wrap(err, "[SERVICE][PrintReceive")
+// 	}
+
+// 	//return Header dan Detail
+// 	return receives, err
+// }

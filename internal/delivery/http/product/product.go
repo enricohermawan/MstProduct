@@ -22,8 +22,8 @@ type IProductSvc interface {
 	TampilAllHeaderDataReceive(ctx context.Context) ([]pEntity.HeaderRC, error)
 	TampilDataByNoReceive(ctx context.Context, NoTranrc string) (pEntity.JSONRCByNoReceive, error)
 	TampilDataDO(ctx context.Context, noTransf string) (doEntity.JSONDO, error)
-	InsertDataFromAPI(ctx context.Context, noTransf string) error
-	EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error
+	InsertDataFromAPI(ctx context.Context, noTransf string) (doEntity.JSONDO, error)
+	EditDetailOrderByNoTransfandProcode(ctx context.Context, noTransf string, procod string, detail doEntity.TransfD) error
 	PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error)
 }
 
@@ -76,6 +76,7 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 			_, getKodeOK := paramMap["kode"]
 			_, NoTranrcOK := paramMap["NoTranrc"]
 			_, NoTransfOK := paramMap["NoTransf"]
+			_, InsertbyNoTransfOK := r.URL.Query()["InsertbyNoTransf"]
 			if getKodeOK {
 				var (
 					kode string
@@ -96,6 +97,17 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 
 				noTransf = r.FormValue("NoTransf")
 				result, err = h.ProductSvc.TampilDataDO(context.Background(), noTransf)
+
+			} else if InsertbyNoTransfOK {
+				var (
+					InsertbyNoTransf string
+					//insert           doEntity.JSONDO1
+				)
+				//body, _ := ioutil.ReadAll(r.Body)
+				//json.Unmarshal(body, &insert)
+				InsertbyNoTransf = r.FormValue("InsertbyNoTransf")
+				result, err = h.ProductSvc.InsertDataFromAPI(context.Background(), InsertbyNoTransf)
+
 			}
 
 		case 0:
@@ -108,18 +120,6 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 		paramMap := r.URL.Query()
 		len := len(paramMap)
 		switch len {
-		case 3:
-			var editProduct doEntity.EditProduct
-			_, NoTransfOK := r.URL.Query()["NoTransf"]
-			_, ProcodOK := r.URL.Query()["Procod"]
-			// _, totalPriceOK := r.URL.Query()["totalPrice"]
-			body, _ := ioutil.ReadAll(r.Body)
-			// totalPrice, _ := strconv.Atoi(r.FormValue("totalPrice"))
-
-			if NoTransfOK && ProcodOK {
-				json.Unmarshal(body, &editProduct)
-				err = h.ProductSvc.EditDetailOrderByNoTransfandProcode(context.Background(), editProduct.Detail, r.FormValue("NoTransf"), r.FormValue("Procod"))
-			}
 		case 1:
 			var noTransf string
 			var insert doEntity.JSONDO
@@ -127,13 +127,25 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 			body, _ := ioutil.ReadAll(r.Body)
 			if noTransfOK {
 				json.Unmarshal(body, &insert)
-				err = h.ProductSvc.InsertDataFromAPI(context.Background(), noTransf)
+				result, err = h.ProductSvc.InsertDataFromAPI(context.Background(), noTransf)
 			}
-
 		}
 
 	// Check if request method is PUT
 	case http.MethodPut:
+		paramMap := r.URL.Query()
+		len := len(paramMap)
+		switch len {
+		case 2:
+			var editProduct doEntity.TransfD
+			_, NoTransfOK := r.URL.Query()["NoTransf"]
+			_, ProcodOK := r.URL.Query()["Procod"]
+			body, _ := ioutil.ReadAll(r.Body)
+			json.Unmarshal(body, &editProduct)
+			if NoTransfOK && ProcodOK {
+				err = h.ProductSvc.EditDetailOrderByNoTransfandProcode(context.Background(), r.FormValue("NoTransf"), r.FormValue("Procod"), editProduct)
+			}
+		}
 
 	// Check if request method is DELETE
 	case http.MethodDelete:

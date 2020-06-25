@@ -19,8 +19,9 @@ func (s *Server) Handler() *mux.Router {
 	// Health Check
 	sub.HandleFunc("/", defaultHandler).Methods("GET")
 	sub.HandleFunc("/", defaultHandler).Methods("GET")
-	sub.HandleFunc("/Product", s.Product.ProductHandler).Methods("GET")
-	sub.HandleFunc("/GetData", s.Product.ProductHandler).Methods("POST")
+	sub.HandleFunc("/GetData", s.Product.ProductHandler).Methods("GET")
+	sub.HandleFunc("/InsertData", s.Product.ProductHandler).Methods("POST")
+	sub.HandleFunc("/EditData", s.Product.ProductHandler).Methods("PUT")
 	return r
 }
 

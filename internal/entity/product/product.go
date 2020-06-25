@@ -287,6 +287,23 @@ type TransfH struct {
 	TransfHDataAktifYN   string    `db:"TransfH_DataAktifYN" json:"TransfH_DataAktifYN"`
 }
 
+// // JSONintiPrintReceive ...
+// type JSONintiPrintReceive struct {
+// 	KodeProduct      zero.String `db:"TranrcD_Procod" json:"KodeProduct"`
+// 	DeskripsiProduct zero.String `db:"" json:"DeskripsiProduct"`
+// 	Jumlah           zero.Int    `db:"TranrcD_QuantityScan" json:"Jumlah"`
+// 	Satuan           zero.Int    `db:"" json:"Satuan"`
+// }
+
+// // JSONheaderPrintReceive ...
+// type JSONheaderPrintReceive struct {
+// 	NomorTransfer  zero.String `db:"TranrcH_NoTransf" json:"NomorTransfer"`
+// 	NomorReceive   zero.String `db:"TranrcH_NoTranrc" json:"NomorReceive"`
+// 	TangaalReceive time.Time   `db:"TranrcH_TglTranrc" json:"TangaalReceive"`
+// 	Pengirim       zero.String `db:"TranrcH_OutCodeTransf" json:"Pengirim"`
+// 	Penerima       zero.String `db:"TranrcH_OutCodeTranrc" json:"Penerima"`
+// }
+
 // JSONPrintReceive ...
 type JSONPrintReceive struct {
 	NomorTransfer    zero.String `db:"TranrcH_NoTransf" json:"NomorTransfer"`
@@ -299,3 +316,9 @@ type JSONPrintReceive struct {
 	Jumlah           zero.Int    `db:"TranrcD_QuantityScan" json:"Jumlah"`
 	Satuan           zero.Int    `db:"" json:"Satuan"`
 }
+
+// // JSONPrintReceive ...
+// type JSONPrintReceive struct {
+// 	JSONHeader JSONheaderPrintReceive
+// 	JSONDetail []JSONintiPrintReceive
+// }

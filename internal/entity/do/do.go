@@ -61,8 +61,14 @@ type TransfH struct {
 
 // JSONDO ...
 type JSONDO struct {
-	Header TransfH
-	Detail []TransfD
+	// InsertTime zero.String `json:"insertTime"`
+	Detail []TransfD `json:"transF_D"`
+	Header TransfH   `json:"transf_h"`
+}
+
+// JSONDO1 ...
+type JSONDO1 struct {
+	Header TransfH `json:"transf_h"`
 }
 
 // // DetailRC ...

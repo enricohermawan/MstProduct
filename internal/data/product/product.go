@@ -207,7 +207,7 @@ func (d Data) InsertDataHeaderFromAPI(ctx context.Context, header doEntity.Trans
 // InsertDataDetailFromAPI ...
 func (d Data) InsertDataDetailFromAPI(ctx context.Context, detail doEntity.TransfD) error {
 	var err error
-	if _, err = d.stmt[insertDataHeaderFromAPI].ExecContext(ctx,
+	if _, err = d.stmt[insertDataDetailFromAPI].ExecContext(ctx,
 		detail.TransfDOutCodeTransf,
 		detail.TransfDNoTransf,
 		detail.TransfDGroup,
@@ -237,18 +237,19 @@ func (d Data) InsertDataDetailFromAPI(ctx context.Context, detail doEntity.Trans
 }
 
 // EditDetailOrderByNoTransfandProcode ...
-func (d Data) EditDetailOrderByNoTransfandProcode(ctx context.Context, detail doEntity.TransfD, noTransf string, procod string) error {
+func (d Data) EditDetailOrderByNoTransfandProcode(ctx context.Context, noTransf string, procod string, detail doEntity.TransfD) (doEntity.TransfD, error) {
 	var (
-		err error
+		json doEntity.TransfD
+		err  error
 	)
 	if _, err := d.stmt[editDataDetail].ExecContext(ctx,
 		detail.TransfDBatchNumber,
 		detail.TransfDQtyScan,
 		noTransf,
 		procod); err != nil {
-		return errors.Wrap(err, "[DATA][EditDetailOrderByNoTransfandProcode] ")
+		return json, errors.Wrap(err, "[DATA][EditDetailOrderByNoTransfandProcode] ")
 	}
-	return err
+	return json, err
 }
 
 // PrintReceive ...
