@@ -21,6 +21,12 @@ type Data interface {
 	InsertDataDetailFromAPI(ctx context.Context, detail doEntity.TransfD) error
 	EditDetailOrderByNoTransfandProcode(ctx context.Context, noTransf string, procod string, detail doEntity.TransfD) (doEntity.TransfD, error)
 	PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error)
+	GenerateReceiveHeader(ctx context.Context) (string, error)
+	InsertReceive(ctx context.Context, noReceive string, noTransf string) error
+	SaveAndGenerateTranRCH(ctx context.Context, header doEntity.TransfHSaveGenerate) error
+	SaveAndGenerateTranRCD(ctx context.Context, detail doEntity.TransfDSaveGenerate) error
+	GetDataDOTransfH(ctx context.Context, noTransf string) (doEntity.TransfHSaveGenerate, error)
+	GetDataDOTransfD(ctx context.Context, noTransf string) ([]doEntity.TransfDSaveGenerate, error)
 }
 
 type mpData interface {
@@ -210,9 +216,11 @@ func (s Service) EditDetailOrderByNoTransfandProcode(ctx context.Context, noTran
 	var (
 		err error
 	)
-
+	// t := time.Now()
+	// detail.TransfDLastUpdate = t.Format("2006-01-02 15:04:05")
 	detail, err = s.productData.EditDetailOrderByNoTransfandProcode(ctx, noTransf, procod, detail)
-	fmt.Println("data : ", detail)
+
+	//fmt.Println("tanggal : ", t.Format("2006-01-02 15:04:05"))
 	if err != nil {
 		return errors.Wrap(err, "[SERVICE][GetAllUsers]")
 	}
@@ -318,3 +326,79 @@ func (s Service) PrintReceive(ctx context.Context, noTransf string, NoTranrc str
 // 	//return Header dan Detail
 // 	return receives, err
 // }
+
+// InsertReceive ...
+func (s Service) InsertReceive(ctx context.Context, noTransf string) error {
+	var (
+		newReceive string
+		//qty        doEntity.TransfD
+		err error
+	)
+	//Generate
+	newReceive, err = s.productData.GenerateReceiveHeader(ctx)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][TampilDataHeaderFromAPI1")
+	}
+	fmt.Println("receive : ", newReceive)
+
+	//Insert
+	err = s.productData.InsertReceive(ctx, newReceive, noTransf)
+	fmt.Println("receiveInsert : ", newReceive)
+	fmt.Println("notransf : ", noTransf)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][InsertDataHeaderFromAPI2")
+	}
+
+	return err
+}
+
+// SaveAndGenerateReceive ...
+func (s Service) SaveAndGenerateReceive(ctx context.Context, noTransf string, json doEntity.JSONDOSaveGenerate) error {
+	var (
+		newReceive string
+		jsondo     doEntity.JSONDOSaveGenerate
+		err        error
+	)
+	//Generate
+	newReceive, err = s.productData.GenerateReceiveHeader(ctx)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][GenerateReceiveHeader]")
+	}
+	fmt.Println("receive : ", newReceive)
+
+	//GetHeader
+	jsondo.Header, err = s.productData.GetDataDOTransfH(ctx, noTransf)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][GetDataDOTransfH]")
+	}
+	fmt.Println("getJSONDOHeader : ", jsondo.Header)
+
+	//getDetail
+	jsondo.Detail, err = s.productData.GetDataDOTransfD(ctx, noTransf)
+	if err != nil {
+		return errors.Wrap(err, "[SERVICE][GetDataDOTransfD]")
+	}
+	fmt.Println("getJSONDODetail : ", jsondo.Detail)
+
+	//insert
+	for _, detail := range jsondo.Detail {
+		//insert
+		if detail.TransfDQtyScan == detail.TransfDQty {
+			fmt.Println("masuk")
+
+			//InsertDetail
+			detail.NoTranrc.SetValid(newReceive)
+			err = s.productData.SaveAndGenerateTranRCD(ctx, detail)
+			fmt.Println("InsertDetail", detail)
+			//InsertHeader
+			jsondo.Header.NoTranrc.SetValid(newReceive)
+			err = s.productData.SaveAndGenerateTranRCH(ctx, jsondo.Header)
+			fmt.Println("InsertHeader", jsondo.Header)
+		}
+		if err != nil {
+			return errors.Wrap(err, "[SERVICE][SaveAndGenerateTranRCD")
+		}
+	}
+
+	return err
+}

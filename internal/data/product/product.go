@@ -58,6 +58,40 @@ const (
 	qprintReceive = `SELECT TranrcH_NoTransf,TranrcH_NoTranrc,TranrcH_TglTranrc,TranrcH_OutCodeTransf,
 	TranrcH_OutCodeTranrc,TranrcD_Procod,TranrcD_QuantityScan FROM TranRCD JOIN TranRCH ON TranRCD.TranrcD_NoTransf
 	= TranRCH.TranrcH_NoTransf WHERE TranrcH_NoTransf = ? AND TranrcH_NoTranrc = ?`
+
+	generateReceiveHeader  = "GenerateReceiveHeader"
+	qgenerateReceiveHeader = `SELECT 
+    CASE 
+    WHEN LENGTH(MAX(RIGHT(TranrcH_NoTranrc,4)+1)) = 1
+    THEN CONCAT('R',DATE_FORMAT(NOW(), '%y%m'),'000',MAX(RIGHT(TranrcH_NoTranrc,4)+1)) 
+
+    WHEN LENGTH(MAX(RIGHT(TranrcH_NoTranrc,4)+1)) = 2
+    THEN CONCAT('R',DATE_FORMAT(NOW(), '%y%m'),'00',MAX(RIGHT(TranrcH_NoTranrc,4)+1)) 
+
+    WHEN LENGTH(MAX(RIGHT(TranrcH_NoTranrc,4)+1)) = 3
+    THEN CONCAT('R',DATE_FORMAT(NOW(), '%y%m'),'0',MAX(RIGHT(TranrcH_NoTranrc,4)+1)) 
+
+    ELSE CONCAT('R',DATE_FORMAT(NOW(), '%y%m'),MAX(RIGHT(TranrcH_NoTranrc,4)+1)) 
+    END AS TranrcH_NoTranrc
+	FROM TranRCH`
+
+	saveAndGenerateTranRCH  = "SaveAndGenerateTranRCH"
+	qsaveAndGenerateTranRCH = "INSERT INTO TranRCH VALUES (NULL,?,?,?,?,?,?,?,?,NULL,?,NULL,?,?)"
+
+	saveAndGenerateTranRCD  = "SaveAndGenerateTranRCD"
+	qsaveAndGenerateTranRCD = "INSERT INTO TranRCD VALUES (NULL,?,?,?,?,?,?,NULL,?,?,?,NULL,NULL,NULL,?,NULL,?,?)"
+
+	insertReceive  = "InsertReceive"
+	qinsertReceive = `UPDATE TranRCH 
+	SET 
+	TranrcH_NoTranrc = ?
+	WHERE TranrcH_NoTransf = ?`
+
+	getDataDOTransfH  = "GetDataDOTransfH"
+	qgetDataDOTransfH = "SELECT * FROM TransfH WHERE TransfH_NoTransf = ?"
+
+	getDataDOTransfD  = "GetDataDOTransfD"
+	qgetDataDOTransfD = "SELECT * FROM TransfD WHERE TransfD_NoTransf = ?"
 )
 
 var (
@@ -71,6 +105,12 @@ var (
 		{insertDataDetailFromAPI, qinsertDataDetailFromAPI},
 		{editDataDetail, qEditDataDetail},
 		{printReceive, qprintReceive},
+		{generateReceiveHeader, qgenerateReceiveHeader},
+		{saveAndGenerateTranRCH, qsaveAndGenerateTranRCH},
+		{saveAndGenerateTranRCD, qsaveAndGenerateTranRCD},
+		{insertReceive, qinsertReceive},
+		{getDataDOTransfH, qgetDataDOTransfH},
+		{getDataDOTransfD, qgetDataDOTransfD},
 	}
 )
 
@@ -271,4 +311,109 @@ func (d Data) PrintReceive(ctx context.Context, noTransf string, NoTranrc string
 	}
 
 	return receives, err
+}
+
+// GenerateReceiveHeader ...
+func (d Data) GenerateReceiveHeader(ctx context.Context) (string, error) {
+	var (
+		newReceive string
+		err        error
+	)
+
+	rows, err := d.stmt[generateReceiveHeader].QueryxContext(ctx)
+
+	for rows.Next() {
+		if err := rows.Scan(&newReceive); err != nil {
+			return newReceive, errors.Wrap(err, "[DATA][GenerateReceiveHeader] ")
+		}
+	}
+	return newReceive, err
+}
+
+// InsertReceive ...
+func (d Data) InsertReceive(ctx context.Context, noReceive string, noTransf string) error {
+	var (
+		err error
+	)
+	if _, err := d.stmt[insertReceive].ExecContext(ctx,
+		noReceive,
+		noTransf,
+	); err != nil {
+		return errors.Wrap(err, "[DATA][EditDetailOrderByNoTransfandProcode] ")
+	}
+	return err
+}
+
+// SaveAndGenerateTranRCH ...
+func (d Data) SaveAndGenerateTranRCH(ctx context.Context, header doEntity.TransfHSaveGenerate) error {
+	var err error
+	if _, err = d.stmt[saveAndGenerateTranRCH].ExecContext(ctx,
+		header.TransfHOutCodeTransf,
+		header.TransfHNoTransf,
+		header.TransfHOutCodeDest,
+		header.NoTranrc,
+		header.TransfHTglTransf,
+		header.TransfHFlag,
+		header.TransfHFlagTrf,
+		header.TransfHTglDwld,
+		header.TransfHActiveYN,
+		header.TransfHLastUpdate,
+		header.TransfHDataAktifYN); err != nil {
+		return errors.Wrap(err, "[DATA][SaveAndGenerateTranRCH]")
+	}
+	return err
+}
+
+// SaveAndGenerateTranRCD ...
+func (d Data) SaveAndGenerateTranRCD(ctx context.Context, detail doEntity.TransfDSaveGenerate) error {
+	var err error
+	if _, err = d.stmt[saveAndGenerateTranRCD].ExecContext(ctx,
+		detail.TransfDOutCodeTransf,
+		detail.TransfDNoTransf,
+		detail.TransfDOutCodeSP,
+		detail.NoTranrc,
+		detail.TransfDProCod,
+		detail.TransfDBatchNumber,
+		detail.TransfDQty,
+		detail.TransfDQtyScan,
+		detail.TransfDQtyStk,
+		detail.TransfDActiveYN,
+		detail.TransfDLastUpdate,
+		detail.TransfDDataAktifYN); err != nil {
+		return errors.Wrap(err, "[DATA][SaveAndGenerateTranRCD]")
+	}
+	return err
+}
+
+// GetDataDOTransfH ...
+func (d Data) GetDataDOTransfH(ctx context.Context, noTransf string) (doEntity.TransfHSaveGenerate, error) {
+	var (
+		header doEntity.TransfHSaveGenerate
+		err    error
+	)
+
+	if err := d.stmt[getDataDOTransfH].QueryRowxContext(ctx, noTransf).StructScan(&header); err != nil {
+		return header, errors.Wrap(err, "[DATA][GetDataDOTransfH]")
+	}
+
+	return header, err
+}
+
+// GetDataDOTransfD ...
+func (d Data) GetDataDOTransfD(ctx context.Context, noTransf string) ([]doEntity.TransfDSaveGenerate, error) {
+	var (
+		rows    *sqlx.Rows
+		detail  doEntity.TransfDSaveGenerate
+		details []doEntity.TransfDSaveGenerate
+		err     error
+	)
+	rows, err = d.stmt[getDataDOTransfD].QueryxContext(ctx, noTransf)
+	for rows.Next() {
+		if err := rows.StructScan(&detail); err != nil {
+			return details, errors.Wrap(err, "[DATA][GetDataDOTranfD] ")
+		}
+		details = append(details, detail)
+	}
+
+	return details, err
 }

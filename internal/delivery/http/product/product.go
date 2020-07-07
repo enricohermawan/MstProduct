@@ -25,8 +25,9 @@ type IProductSvc interface {
 	InsertDataFromAPI(ctx context.Context, noTransf string) (doEntity.JSONDO, error)
 	EditDetailOrderByNoTransfandProcode(ctx context.Context, noTransf string, procod string, detail doEntity.TransfD) error
 	PrintReceive(ctx context.Context, noTransf string, NoTranrc string) ([]pEntity.JSONPrintReceive, error)
+	InsertReceive(ctx context.Context, noTransf string) error
+	SaveAndGenerateReceive(ctx context.Context, noTransf string, json doEntity.JSONDOSaveGenerate) error
 }
-
 type (
 	// Handler ...
 	Handler struct {
@@ -77,6 +78,7 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 			_, NoTranrcOK := paramMap["NoTranrc"]
 			_, NoTransfOK := paramMap["NoTransf"]
 			_, InsertbyNoTransfOK := r.URL.Query()["InsertbyNoTransf"]
+			_, SaveGenerateOK := r.URL.Query()["SaveGenerate"]
 			if getKodeOK {
 				var (
 					kode string
@@ -108,6 +110,15 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 				InsertbyNoTransf = r.FormValue("InsertbyNoTransf")
 				result, err = h.ProductSvc.InsertDataFromAPI(context.Background(), InsertbyNoTransf)
 
+			} else if SaveGenerateOK {
+				var (
+					SaveGenerate string
+					insert       doEntity.JSONDOSaveGenerate
+				)
+				body, _ := ioutil.ReadAll(r.Body)
+				json.Unmarshal(body, &insert)
+				SaveGenerate = r.FormValue("SaveGenerate")
+				err = h.ProductSvc.SaveAndGenerateReceive(context.Background(), SaveGenerate, insert)
 			}
 
 		case 0:
@@ -122,13 +133,14 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 		switch len {
 		case 1:
 			var noTransf string
-			var insert doEntity.JSONDO
+			var insert doEntity.JSONDOSaveGenerate
 			_, noTransfOK := r.URL.Query()["NoTransf"]
 			body, _ := ioutil.ReadAll(r.Body)
 			if noTransfOK {
 				json.Unmarshal(body, &insert)
-				result, err = h.ProductSvc.InsertDataFromAPI(context.Background(), noTransf)
+				err = h.ProductSvc.SaveAndGenerateReceive(context.Background(), noTransf, insert)
 			}
+
 		}
 
 	// Check if request method is PUT
@@ -144,6 +156,13 @@ func (h *Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 			json.Unmarshal(body, &editProduct)
 			if NoTransfOK && ProcodOK {
 				err = h.ProductSvc.EditDetailOrderByNoTransfandProcode(context.Background(), r.FormValue("NoTransf"), r.FormValue("Procod"), editProduct)
+			}
+		case 1:
+			var noTransf string
+			_, noTransfOK := r.URL.Query()["NoTransf"]
+			noTransf = r.FormValue("NoTransf")
+			if noTransfOK {
+				err = h.ProductSvc.InsertReceive(context.Background(), noTransf)
 			}
 		}
 

@@ -235,10 +235,10 @@ type JSONRCByNoReceive struct {
 	DetailRC []DetailRC
 }
 
-// HeaderDanTranRCH ...
-type HeaderDanTranRCH struct {
-	TranRCH
-	HeaderRC
+// TranRCDDanTranRCH ...
+type TranRCDDanTranRCH struct {
+	TranRCD []TranRCD
+	TranRCH TranRCH
 }
 
 // DetailDanTranRCD ...
@@ -308,7 +308,7 @@ type TransfH struct {
 type JSONPrintReceive struct {
 	NomorTransfer    zero.String `db:"TranrcH_NoTransf" json:"NomorTransfer"`
 	NomorReceive     zero.String `db:"TranrcH_NoTranrc" json:"NomorReceive"`
-	TangaalReceive   time.Time   `db:"TranrcH_TglTranrc" json:"TangaalReceive"`
+	TangalReceive    time.Time   `db:"TranrcH_TglTranrc" json:"TangaalReceive"`
 	Pengirim         zero.String `db:"TranrcH_OutCodeTransf" json:"Pengirim"`
 	Penerima         zero.String `db:"TranrcH_OutCodeTranrc" json:"Penerima"`
 	KodeProduct      zero.String `db:"TranrcD_Procod" json:"KodeProduct"`

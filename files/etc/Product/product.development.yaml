@@ -5,4 +5,4 @@ database:
 api:
     mp: "https://api.docnet.id/CHCMasterProduk"
     outlet: "https://api.docnet.id/CHCMasterH/MasterOutlet/"
-    do: "https://temp-api.cfu.pharmalink.id//CHCDO/DO"
+    do: "https://temp-api.cfu.pharmalink.id/CHCDO/DO"
